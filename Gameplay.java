@@ -118,20 +118,20 @@ public class Gameplay {
 	
 	// checks if all spaces on board have been filled and no valid moves can be made
 	private static boolean loseCheck() {
-		int numFilled = 0;
-		
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				if (userArray[i][j] != 0) 
-					++numFilled;
-			}
-		}
-		
-		if (numFilled == 16) {
-			if ((!validLeft()) && (!validRight()) && (!validUp()) && (!validDown()))
-				return true;
-		}
-		return false;
+	    for (int i = 0; i < 4; ++i) {
+	        for (int j = 0; j < 4; ++j) {
+	            if (userArray[i][j] == 0) {
+	                return false; // There's an empty space, so the game is not lost
+	            }
+	            if (j < 3 && userArray[i][j] == userArray[i][j + 1]) {
+	                return false; // There's a merge possible, so the game is not lost
+	            }
+	            if (i < 3 && userArray[i][j] == userArray[i + 1][j]) {
+	                return false; // There's a merge possible, so the game is not lost
+	            }
+	        }
+	    }
+	    return true; // All spaces are filled, and no valid moves are possible
 	}
 	
 	// checks if a space has the value of 2048 by tracking if maxNum is 2048
@@ -254,43 +254,39 @@ public class Gameplay {
 		    }
 		}
 		//left
+		// patched on 11/8/2023
 		else if (dir == 'a') {
-			for (int i = 0; i < userArray.length; i++){
-		        int zeroCount = 0;
-		        for (int j = 0; j < userArray.length; j++){
-		            if (userArray[i][j] == 0){
-		                zeroCount++;
-		            }
-		            else{
-		                userArray[i][j-zeroCount] = userArray[i][j];
-		                if (zeroCount!=0){
-		                    userArray[i][j] = 0;
+			for (int i = 0; i < 4; i++) {
+		            // Compact non-zero elements to the left
+		            int insertIndex = 0;
+		            for (int j = 0; j < 4; j++) {
+		                if (userArray[i][j] != 0) {
+		                    userArray[i][insertIndex] = userArray[i][j];
+		                    if (j != insertIndex) {
+		                        userArray[i][j] = 0;
+		                    }
+		                    insertIndex++;
 		                }
 		            }
-		        }
-		    }
-			for(int i= 0; i < userArray.length - 1; i++) {
-				for(int j = 1; j < userArray.length; j++) {
-					if(userArray[i][j] == userArray[i][j - 1]) {
-	                	userArray[i][j - 1] += userArray[i][j];
-	                	userArray[i][j] = 0;
-					}
-				}
+		            // Merge adjacent equal elements
+		            for (int j = 0; j < 3; j++) {
+		                if (userArray[i][j] == userArray[i][j + 1] && userArray[i][j] != 0) {
+		                    userArray[i][j] *= 2;
+		                    userArray[i][j + 1] = 0;
+		                }
+		            }
+		            // Compact non-zero elements to the left again
+		            insertIndex = 0;
+		            for (int j = 0; j < 4; j++) {
+		                if (userArray[i][j] != 0) {
+		                    userArray[i][insertIndex] = userArray[i][j];
+		                    if (j != insertIndex) {
+		                        userArray[i][j] = 0;
+		                    }
+		                    insertIndex++;
+		                }
+		            }
 			}
-			for (int i = 0; i < userArray.length; i++){
-		        int zeroCount = 0;
-		        for (int j = 0; j < userArray[i].length; j++){
-		            if (userArray[i][j] == 0){
-		                zeroCount++;
-		            }
-		            else{
-		                userArray[i][j-zeroCount] = userArray[i][j];
-		                if (zeroCount!=0){
-		                    userArray[i][j] = 0;
-		                }
-		            }
-		        }
-		    }
 		}
 		//down
 		else if (dir == 's') {
@@ -375,16 +371,21 @@ public class Gameplay {
 	
 	
 	// checks if a shift to the left will result in a valid move
-	private static boolean validLeft()	{
-		for (int i = 0; i <= 3; ++i) {
-			for (int j = 3; j >= 1; --j) {
-            	if(userArray[i][j] != 0 && userArray[i][j - 1] == 0) {
-            		return true;
-            	}
-            	if(userArray[i][j] != 0 && userArray[i][j - 1] == userArray[i][j]) {
-            		return true;
-            	}
-            }
+	// patched on 11/8/2023
+	private static boolean validLeft() {
+		for (int i = 0; i < 4; i++) {
+			boolean canMove = false;
+			for (int j = 1; j < 4; j++) {
+            			if (userArray[i][j] != 0) {
+					if (userArray[i][j - 1] == 0 || userArray[i][j - 1] == userArray[i][j]) {
+						canMove = true;
+						break;
+					}
+            			}
+            		}
+			if (canMove) {
+				return true;
+			}
 		}
 		return false;
 	}
