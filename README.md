@@ -11,6 +11,3 @@ The program checks first if a valid move can be made before actually making the 
 
 The game continues until either the user is no longer able to make any more valid moves (checked using the valid move checkers mentioned in the paragraph above, and if the array has all non-zero values), or if one of the values on the board reaches 2048 (tracked using the maxNum variable).  The main method simply calls the game method (which contains all the other methods), which continues into the rest of the gameplay.
 
--The Bound does not account for positive exceptions (filled in board but there are still valid moves) 
-
--Left also does not work
